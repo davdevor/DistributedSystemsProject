@@ -5,11 +5,13 @@
 #include <chrono>
 #include <algorithm>
 #include <limits.h>
+#include <sys/time.h>
 #include<omp.h>
 #define MAX 100 //the max array value for distance_mat
 #define CITI 12 //The number of cities
-#define popSize 100
+#define popSize 100000
 #define goal 821
+//#define openmp false
 using namespace std;
 using std::cout;
 using std::endl;
@@ -25,6 +27,20 @@ long bestCost; //Global bestCost variable
 vector<vector<long> > population;
 vector<double> fitness(popSize);
 vector<long> children(popSize);
+
+double read_timer( )
+{
+    static bool initialized = false;
+    static struct timeval start;
+    struct timeval end;
+    if( !initialized )
+    {
+        gettimeofday( &start, NULL );
+        initialized = true;
+    }
+    gettimeofday( &end, NULL );
+    return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
+}
 
 void readDistanceMatrix()
 {
@@ -73,10 +89,12 @@ void twoswap(int i, int p, int q) {
 //computes average fitness
 double avgFitness() {
 	double sum = 0;
-    #pragma omp parallel for simd reduction(+:sum)
+    double simulation_time = omp_get_wtime();
+    #pragma omp parallel for simd num_threads(2) reduction(+:sum)
 	for (int i = 0; i < popSize; i++) {
 		sum += fitness[i];
 	}
+    wcout << omp_get_wtime() - simulation_time <<endl;
 	sum /= popSize;
 	return sum;
 }
@@ -84,7 +102,10 @@ void offspring() {
 	double prior = 0.0;
 	int index = 0;
 	int count = 0;
+
 	double averageFitness = avgFitness();
+
+
 	double r = rand() / ((double)RAND_MAX);
 	prior = fitness[0] / averageFitness;
 	fitness[0] = prior;
@@ -117,14 +138,11 @@ void computeFitness() {
 
 	long costs[popSize];
 	//run loop in parallel
-	#pragma omp parallel num_threads(4)
-	{
-	#pragma omp for simd
-		for (int i = 0; i < popSize; ++i) {
-			//compute tour cost for each member of population
-			costs[i] = computeTourCost(population[i]);
-		}
-	}
+    //#pragma omp parallel for num_threads(2)
+    for (int i = 0; i < popSize; ++i) {
+        //compute tour cost for each member of population
+        costs[i] = computeTourCost(population[i]);
+    }
 	for (int i = 0; i < popSize; ++i) {
 		tourCost = costs[i];
 		if (tourCost < bestCost) { //see if this full tour is better than the best known tour
@@ -193,9 +211,13 @@ void heuristicCrossover() {
 
 
 
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for (int i = 0; i < popSize; i += 2) {
+#ifdef openmp
         srand(time(NULL)*omp_get_thread_num());
+#else
+        srand(time(NULL));
+#endif
         int conn1;
         int conn2;
 
@@ -329,8 +351,8 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	while (sentinel) {
-
+	//while (sentinel) {
+    for(int i = 0; i < 1; ++i){
 		//randomly shuffle the populations to a new tour
 		shuffle();
 		//compute fitness of each tours
@@ -349,17 +371,19 @@ void gaTSP() {
 }
 
 
-
 int main()
 {
 	bestCost = INT_MAX; //set best cost very high so we can go under it
 
 	readDistanceMatrix(); //read in our distance_matrix
 
-	auto start = chrono::steady_clock::now();
+    double simulation_time = read_timer();
+	//auto start = chrono::steady_clock::now();
 	gaTSP();
-	auto end = chrono::steady_clock::now();
-	cout << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(end - start).count() << endl;
+    simulation_time = read_timer( ) - simulation_time;
+	//auto end = chrono::steady_clock::now();
+	//cout << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(end - start).count() << endl;
+    cout << "time " << simulation_time << endl;
 	system("pause"); //allows a pause before shutting down for use outside the compiler
 	return 0;
 }
