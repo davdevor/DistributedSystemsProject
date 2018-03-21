@@ -162,15 +162,16 @@ void createNewPopulation() {
 
 void shuffle() {
 	//seed random number generator
-	srand(time(NULL));
-
+	std::random_device rd;
+    	std::mt19937 mt(rd());
+    	std::uniform_int_distribution<int> dist(1, CITI);
 	for (int i = 0; i < popSize; i++) {
 		//get random number of swaps
-		int swaps = 1 + (rand() % (CITI - 1));
+		int swaps = dist(mt);
 		for (int k = 0; k < swaps; k++) {
 			//get two random places to swap
-			int p = 1 + (rand() % (CITI - 1));
-			int q = 1 + (rand() % (CITI - 1));
+			int p = dist(mt);
+			int q = dist(mt);
 			//call method to swap positons in tour
 			twoswap(i, p, q);
 		}
