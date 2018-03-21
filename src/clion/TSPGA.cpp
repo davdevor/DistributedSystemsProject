@@ -9,7 +9,7 @@
 #include<omp.h>
 #define MAX 100 //the max array value for distance_mat
 #define CITI 12 //The number of cities
-#define popSize 100000
+#define popSize 1000000
 #define goal 821
 //#define openmp false
 using namespace std;
@@ -27,6 +27,7 @@ long bestCost; //Global bestCost variable
 vector<vector<long> > population;
 vector<double> fitness(popSize);
 vector<long> children(popSize);
+double avgFitness;
 
 double read_timer( )
 {
@@ -45,7 +46,7 @@ double read_timer( )
 void readDistanceMatrix()
 {
 	ifstream inf;
-	inf.open("/home/david/github/DistributedSystemsProject/src/clion/tsp12.txt");
+	inf.open("/home/david/Documents/github/DistributedSystemsProject/src/clion/tsp12.txt");
 	int value, i, j;
 	for (i = 0; i < CITI && !inf.fail(); i++) {
 		for (j = i; j < CITI && !inf.fail(); j++) {
@@ -86,32 +87,20 @@ void twoswap(int i, int p, int q) {
 
 }
 
-//computes average fitness
-double avgFitness() {
-	double sum = 0;
-    double simulation_time = omp_get_wtime();
-    #pragma omp parallel for simd num_threads(2) reduction(+:sum)
-	for (int i = 0; i < popSize; i++) {
-		sum += fitness[i];
-	}
-    wcout << omp_get_wtime() - simulation_time <<endl;
-	sum /= popSize;
-	return sum;
-}
 void offspring() {
 	double prior = 0.0;
 	int index = 0;
 	int count = 0;
 
-	double averageFitness = avgFitness();
+
 
 
 	double r = rand() / ((double)RAND_MAX);
-	prior = fitness[0] / averageFitness;
+	prior = fitness[0] / avgFitness;
 	fitness[0] = prior;
 
 	for (int i = 1; i < popSize; ++i) {
-		fitness[i] = ((double)fitness[i] / averageFitness) + prior;
+		fitness[i] = ((double)fitness[i] / avgFitness) + prior;
 		prior = fitness[i];
 	}
 	/*
@@ -135,29 +124,38 @@ void offspring() {
 
 void computeFitness() {
 	long tourCost;
-
-	long costs[popSize];
+    avgFitness = 0.0;
+    double simulation_time;
+    double endTime;
+    simulation_time = omp_get_wtime();
 	//run loop in parallel
-    //#pragma omp parallel for num_threads(2)
+    #pragma omp parallel for reduction(+:avgFitness)
     for (int i = 0; i < popSize; ++i) {
         //compute tour cost for each member of population
-        costs[i] = computeTourCost(population[i]);
-    }
-	for (int i = 0; i < popSize; ++i) {
-		tourCost = costs[i];
-		if (tourCost < bestCost) { //see if this full tour is better than the best known tour
-			bestCost = tourCost;
-			if (tourCost == goal) {
-				sentinel = false;
-			}
-			cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
-			for (int k = 0; k < CITI; ++k) {
-				cout << population.at(i).at(k) << " "; //now print the path taken (for verification if needed
-			}
-			cout << endl;
-		}
-		fitness[i] = (double)tourCost;
+        tourCost = computeTourCost(population[i]);
+
+        fitness[i] = (double)tourCost;
+        avgFitness += (double)tourCost;
+        #pragma omp critical
+        {
+            if (tourCost < bestCost) { //see if this full tour is better than the best known tour
+                bestCost = tourCost;
+                if (tourCost == goal) {
+                    sentinel = false;
+                }
+                cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
+                for (int k = 0; k < CITI; ++k) {
+                    cout << population.at(i).at(k) << " "; //now print the path taken (for verification if needed
+                }
+                cout << endl;
+            }
+        }
+
 	}
+
+    endTime=omp_get_wtime() - simulation_time;
+    wcout << endTime <<endl;
+    avgFitness/=popSize;
 }
 
 
