@@ -9,7 +9,7 @@
 #include<omp.h>
 #define MAX 100 //the max array value for distance_mat
 #define CITI 12 //The number of cities
-#define popSize 1000000
+#define popSize 100000
 #define goal 821
 //#define openmp false
 using namespace std;
@@ -29,19 +29,6 @@ vector<double> fitness(popSize);
 vector<long> children(popSize);
 double avgFitness;
 
-double read_timer( )
-{
-    static bool initialized = false;
-    static struct timeval start;
-    struct timeval end;
-    if( !initialized )
-    {
-        gettimeofday( &start, NULL );
-        initialized = true;
-    }
-    gettimeofday( &end, NULL );
-    return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
-}
 
 void readDistanceMatrix()
 {
@@ -79,11 +66,6 @@ long computeTourCost(vector<long> tour)
 	return sum; //return the total cost
 }
 
-void twoswap(int i, int p, int q) {
-
-
-
-}
 
 void offspring() {
 	double prior = 0.0;
@@ -125,7 +107,7 @@ void computeFitness() {
     avgFitness = 0.0;
 
 	//run loop in parallel
-    #pragma omp parallel for reduction(+:avgFitness)
+    #pragma omp parallel for reduction(+:avgFitness) private(tourCost)
     for (int i = 0; i < popSize; ++i) {
         //compute tour cost for each member of population
         tourCost = computeTourCost(population[i]);
@@ -176,13 +158,7 @@ void createNewPopulation() {
 
 
 void shuffle() {
-	//seed random number generator
-
-
-    double simulation_time;
-    double endTime;
-    simulation_time = omp_get_wtime();
-
+	//setup and seed random number generator
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_int_distribution<int> dist(1, CITI-1);
@@ -207,9 +183,6 @@ void shuffle() {
             }
         }
     }
-    endTime=omp_get_wtime() - simulation_time;
-    cout << endTime <<endl;
-    return;
 }
 
 /*
@@ -222,26 +195,27 @@ void shuffle() {
 */
 void heuristicCrossover() {
 
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<int> dist(1, CITI-1);
 
-
-
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < popSize; i += 2) {
 
         int conn1;
         int conn2;
 
 		//randomly pick a start city
-		int city = 1 + (rand() % (CITI - 1));
+		int city = dist(rd);
 		vector<long> newTour = vector<long>(CITI);
-		//holds which city has been visited
-		//each postion corresponds to each city
+		/*nums holds which city has been visited
+		  each postion corresponds to each city*/
 		vector<long> nums = vector<long>(CITI);
 		nums[city] = 1;
 		nums[0] = 1;
 		newTour[1] = city;
-		int k;
-		for (k = 2; k < CITI; ++k) {
+
+		for (int k = 2; k < CITI; ++k) {
 			int pos1 = 0;
 			//find the start city in parent 1
 			while (population[i][pos1] != city)
@@ -257,7 +231,7 @@ void heuristicCrossover() {
 			}
 
 			int cost1;
-			//if city is at end of parent no connecting edge max cost max int
+			//if city is at end of parent tour there is no connecting edge max cost max int
 			if (pos1 == (CITI - 1)) {
 				cost1 = INT_MAX;
 			}
@@ -269,7 +243,7 @@ void heuristicCrossover() {
 			}
 
 			int cost2;
-			//if city is at end of parent no connecting edge max cost max int
+			//if city is at end of parent tour there is no connecting edge max cost max int
 			if (pos2 == (CITI - 1)) {
 				cost2 = INT_MAX;
 			}
@@ -284,8 +258,8 @@ void heuristicCrossover() {
 			//randomly choose the conenecting city
 			if (cost1 == INT_MAX && cost2 == INT_MAX) {
 
-				//temp vector
-				vector<long> nums2;
+				//temp vector it is going to hold all the cities not visited
+				vector<int> nums2;
 				for (int z = 0; z < CITI; ++z) {
 					//if 0 means city z has not been visited
 					//add z to nums2
@@ -305,6 +279,7 @@ void heuristicCrossover() {
 				//first connection is better than second
 				if (cost1 < cost2) {
 					//check and see if city has been visited
+                    //if the city has been visited randomly pick a new one
 					if (nums[conn1] == 1) {
 						vector<long> nums2;
 						for (int z = 0; z < CITI; ++z) {
@@ -320,6 +295,7 @@ void heuristicCrossover() {
 				}
 				else {
 					//check and see if city has been visited
+                    //if the city has been visited randomly pick a new one
 					if (nums[conn2] == 1) {
 						vector<long> nums2;
 						for (int k = 0; k < CITI; ++k) {
@@ -378,7 +354,7 @@ void gaTSP() {
 		offspring();
 		//create the new population
 		createNewPopulation();
-		//edits the tour some more
+		//edits the population some more
 		heuristicCrossover();
 		//reset fitness and children values
 		clear();
@@ -394,12 +370,10 @@ int main()
 
 	readDistanceMatrix(); //read in our distance_matrix
 
-    double simulation_time = read_timer();
-	//auto start = chrono::steady_clock::now();
+    double simulationTime = omp_get_wtime();
 	gaTSP();
-    simulation_time = read_timer( ) - simulation_time;
-	//auto end = chrono::steady_clock::now();
-	//cout << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(end - start).count() << endl;
-    cout << "time " << simulation_time << endl;
+    double endTime =  omp_get_wtime();
+
+    cout << "time " << endTime - simulationTime << endl;
 	return 0;
 }
