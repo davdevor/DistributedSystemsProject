@@ -177,27 +177,28 @@ void createNewPopulation() {
 
 void shuffle() {
 	//seed random number generator
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_int_distribution<int> dist(1, CITI);
+
 
     double simulation_time;
     double endTime;
     simulation_time = omp_get_wtime();
 
-    //#pragma omp parallel
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<int> dist(1, CITI-1);
+    #pragma omp parallel
     {
-        //srand(time(NULL)*omp_get_thread_num());
-        #pragma omp parallel for schedule(static)
+        int swaps ,p,q;
+        long temp;
+        #pragma omp for schedule(static)
         for (int i = 0; i < popSize; ++i) {
-            int swaps ,p,q;
-            long temp;
+
             //get random number of swaps
-            swaps = 1 + ( dist(mt) % (CITI - 1));
+            swaps = dist(mt);
             for (int k = 0; k < swaps; ++k) {
                 //get two random places to swap
-                p = 1 + ( dist(mt) % (CITI - 1));
-                q = 1 + ( dist(mt) % (CITI - 1));
+                p = dist(mt);
+                q = dist(mt);
                 //call method to swap positons in tour
                 temp = population[i][p];
                 population[i][p] = population[i][q];
