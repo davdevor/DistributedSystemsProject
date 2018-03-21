@@ -81,9 +81,7 @@ long computeTourCost(vector<long> tour)
 
 void twoswap(int i, int p, int q) {
 
-	long temp = population[i][p];
-	population[i][p] = population[i][q];
-	population[i][q] = temp;
+
 
 }
 
@@ -125,9 +123,7 @@ void offspring() {
 void computeFitness() {
 	long tourCost;
     avgFitness = 0.0;
-    double simulation_time;
-    double endTime;
-    simulation_time = omp_get_wtime();
+
 	//run loop in parallel
     #pragma omp parallel for reduction(+:avgFitness)
     for (int i = 0; i < popSize; ++i) {
@@ -153,14 +149,14 @@ void computeFitness() {
 
 	}
 
-    endTime=omp_get_wtime() - simulation_time;
-    wcout << endTime <<endl;
+
     avgFitness/=popSize;
 }
 
 
 void createNewPopulation() {
 	int index = 0;
+
 	//copy over parents the number of times the children vector specifies
 	//if children[i] = 2 then copy over population[i] 2 times
 	vector<vector<long> > temp(popSize, vector<long>(CITI));
@@ -181,20 +177,38 @@ void createNewPopulation() {
 
 void shuffle() {
 	//seed random number generator
-	srand(time(NULL));
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<int> dist(1, CITI);
 
-	//#pragma omp parallel for num_threads(4)
-	for (int i = 0; i < popSize; i++) {
-		//get random number of swaps
-		int swaps = 1 + (rand() % (CITI - 1));
-		for (int k = 0; k < swaps; k++) {
-			//get two random places to swap
-			int p = 1 + (rand() % (CITI - 1));
-			int q = 1 + (rand() % (CITI - 1));
-			//call method to swap positons in tour
-			twoswap(i, p, q);
-		}
-	}
+    double simulation_time;
+    double endTime;
+    simulation_time = omp_get_wtime();
+
+    //#pragma omp parallel
+    {
+        //srand(time(NULL)*omp_get_thread_num());
+        #pragma omp parallel for schedule(static)
+        for (int i = 0; i < popSize; ++i) {
+            int swaps ,p,q;
+            long temp;
+            //get random number of swaps
+            swaps = 1 + ( dist(mt) % (CITI - 1));
+            for (int k = 0; k < swaps; ++k) {
+                //get two random places to swap
+                p = 1 + ( dist(mt) % (CITI - 1));
+                q = 1 + ( dist(mt) % (CITI - 1));
+                //call method to swap positons in tour
+                temp = population[i][p];
+                population[i][p] = population[i][q];
+                population[i][q] = temp;
+                //twoswap(i, p, q);
+            }
+        }
+    }
+    endTime=omp_get_wtime() - simulation_time;
+    cout << endTime <<endl;
+    return;
 }
 
 /*
@@ -374,6 +388,7 @@ void gaTSP() {
 
 int main()
 {
+
 	bestCost = INT_MAX; //set best cost very high so we can go under it
 
 	readDistanceMatrix(); //read in our distance_matrix
@@ -385,6 +400,5 @@ int main()
 	//auto end = chrono::steady_clock::now();
 	//cout << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(end - start).count() << endl;
     cout << "time " << simulation_time << endl;
-	system("pause"); //allows a pause before shutting down for use outside the compiler
 	return 0;
 }
