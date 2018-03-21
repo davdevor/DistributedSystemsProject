@@ -196,6 +196,7 @@ void shuffle() {
 		}
 	}
 }
+
 /*
 	this method takes two parents and produces a child
 	you start by randomly choosing a starting city then
@@ -211,11 +212,7 @@ void heuristicCrossover() {
 
 	//#pragma omp parallel for
 	for (int i = 0; i < popSize; i += 2) {
-#ifdef openmp
-        srand(time(NULL)*omp_get_thread_num());
-#else
-        srand(time(NULL));
-#endif
+
         int conn1;
         int conn2;
 
@@ -338,6 +335,13 @@ void heuristicCrossover() {
 		}
 	}
 }
+void clear(){
+    #pragma omp parallel for simd
+    for(int i = 0; i < popSize; ++i){
+        fitness[i] = 0.0;
+        children[i] = 0;
+    }
+}
 void gaTSP() {
 	//init population
 	//population is a vector of vectors, and each vector
@@ -362,8 +366,7 @@ void gaTSP() {
 		//edits the tour some more
 		heuristicCrossover();
 		//reset fitness and children values
-		fitness = vector<double>(popSize, 0.0);
-		children = vector<long>(popSize, 0);
+		clear();
 	}
 
 }
