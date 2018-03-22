@@ -1,15 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <time.h>
-#include <chrono>
 #include <algorithm>
 #include <limits.h>
-#include <sys/time.h>
+#include <string.h>
 #include<omp.h>
 #define MAX 100 //the max array value for distance_mat
 #define CITI 12 //The number of cities
-#define popSize 100000
 #define goal 821
 //#define openmp false
 using namespace std;
@@ -18,22 +15,22 @@ using std::endl;
 using std::ifstream;
 using std::vector;
 using std::iterator;
+int popSize;
 bool sentinel = true;
-//#define INT_MAX 2147483647
 long distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
 vector<long> Remainder; //Global Remainder vector
 vector<long> tour; //Global tour Vector
 long bestCost; //Global bestCost variable
 vector<vector<long> > population;
-vector<double> fitness(popSize);
-vector<long> children(popSize);
+vector<double> fitness;
+vector<long> children;
 double avgFitness;
 
 
 void readDistanceMatrix()
 {
 	ifstream inf;
-	inf.open("/home/david/Documents/github/DistributedSystemsProject/src/clion/tsp12.txt");
+	inf.open("../tsp12.txt");
 	int value, i, j;
 	for (i = 0; i < CITI && !inf.fail(); i++) {
 		for (j = i; j < CITI && !inf.fail(); j++) {
@@ -362,14 +359,32 @@ void gaTSP() {
 
 }
 
+//read in command line input
+int find_option( int argc, char **argv, const char *option )
+{
+    for( int i = 1; i < argc; i++ )
+        if( strcmp( argv[i], option ) == 0 )
+            return i;
+    return -1;
+}
 
-int main()
+int read_int( int argc, char **argv, const char *option, int default_value )
+{
+    int iplace = find_option( argc, argv, option );
+    if( iplace >= 0 && iplace < argc-1 )
+        return atoi( argv[iplace+1] );
+    return default_value;
+}
+
+int main(int argc, char **argv)
 {
 
 	bestCost = INT_MAX; //set best cost very high so we can go under it
 
 	readDistanceMatrix(); //read in our distance_matrix
-
+    popSize = read_int(argc, argv, "-n", 10000);
+    fitness.reserve(popSize);
+    children.reserve(popSize);
     double simulationTime = omp_get_wtime();
 	gaTSP();
     double endTime =  omp_get_wtime();
