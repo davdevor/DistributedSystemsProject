@@ -344,8 +344,8 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	//while (sentinel) {
-    for(int i = 0; i < 1; ++i){
+	while (sentinel) {
+    //for(int i = 0; i < 1; ++i){
 		//randomly shuffle the populations to a new tour
 		shuffle();
 		//compute fitness of each tours
