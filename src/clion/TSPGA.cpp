@@ -6,8 +6,6 @@
 #include <string.h>
 #include<omp.h>
 #define MAX 100 //the max array value for distance_mat
-#define CITI 12 //The number of cities
-#define goal 821
 //#define openmp false
 using namespace std;
 using std::cout;
@@ -16,6 +14,8 @@ using std::ifstream;
 using std::vector;
 using std::iterator;
 int popSize;
+int CITI;
+int goal;
 bool sentinel = true;
 long distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
 vector<long> Remainder; //Global Remainder vector
@@ -30,7 +30,10 @@ double avgFitness;
 void readDistanceMatrix()
 {
 	ifstream inf;
-	inf.open("../tsp12.txt");
+    string file = "../tsp";//+CITI;
+    file += std::to_string(CITI);
+    file+=".txt";
+	inf.open(file);
 	int value, i, j;
 	for (i = 0; i < CITI && !inf.fail(); i++) {
 		for (j = i; j < CITI && !inf.fail(); j++) {
@@ -379,12 +382,14 @@ int read_int( int argc, char **argv, const char *option, int default_value )
 int main(int argc, char **argv)
 {
 
-	bestCost = INT_MAX; //set best cost very high so we can go under it
 
-	readDistanceMatrix(); //read in our distance_matrix
     popSize = read_int(argc, argv, "-n", 10000);
+    CITI = read_int(argc, argv,"-c",12);
+    goal = read_int(argc, argv,"-g",821);
     fitness.reserve(popSize);
     children.reserve(popSize);
+    bestCost = INT_MAX; //set best cost very high so we can go under it
+    readDistanceMatrix(); //read in our distance_matrix
     double simulationTime = omp_get_wtime();
 	gaTSP();
     double endTime =  omp_get_wtime();
