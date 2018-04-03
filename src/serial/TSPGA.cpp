@@ -321,8 +321,8 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	while (sentinel) {
-
+	//while (sentinel) {
+	for(int i = 0; i < 1000; ++i){
 		//randomly shuffle the populations to a new tour
 		shuffle();
 		//compute fitness of each tours
@@ -340,10 +340,30 @@ void gaTSP() {
 
 }
 
+//read in command line input
+int find_option( int argc, char **argv, const char *option )
+{
+    for( int i = 1; i < argc; i++ )
+        if( strcmp( argv[i], option ) == 0 )
+            return i;
+    return -1;
+}
 
+int read_int( int argc, char **argv, const char *option, int default_value )
+{
+    int iplace = find_option( argc, argv, option );
+    if( iplace >= 0 && iplace < argc-1 )
+        return atoi( argv[iplace+1] );
+    return default_value;
+}
 
 int main()
 {
+	popSize = read_int(argc, argv, "-n", 100);
+    	CITI = read_int(argc, argv,"-c",12);
+    	goal = read_int(argc, argv,"-g",821);
+    	fitness = vector<double>(popSize);
+    	children = vector<long>(popSize);
 	bestCost = INT_MAX; //set best cost very high so we can go under it
 
 	readDistanceMatrix(); //read in our distance_matrix
