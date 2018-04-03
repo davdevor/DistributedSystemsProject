@@ -6,7 +6,6 @@
 #include <string.h>
 #include<omp.h>
 #define MAX 100 //the max array value for distance_mat
-//#define openmp false
 using namespace std;
 using std::cout;
 using std::endl;
@@ -30,7 +29,7 @@ double avgFitness;
 void readDistanceMatrix()
 {
 	ifstream inf;
-    string file = "../tsp";//+CITI;
+    string file = "../tsp";
     file += std::to_string(CITI);
     file+=".txt";
 	inf.open(file);
@@ -158,7 +157,7 @@ void createNewPopulation() {
 
 
 void shuffle() {
-	//setup and seed random number generator
+	//setup anford seed random number generator
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_int_distribution<int> dist(1, CITI-1);
@@ -166,7 +165,7 @@ void shuffle() {
     {
         int swaps ,p,q;
         long temp;
-        #pragma omp for schedule(static)
+        #pragma omp for
         for (int i = 0; i < popSize; ++i) {
 
             //get random number of swaps
@@ -179,7 +178,6 @@ void shuffle() {
                 temp = population[i][p];
                 population[i][p] = population[i][q];
                 population[i][q] = temp;
-                //twoswap(i, p, q);
             }
         }
     }
@@ -344,8 +342,8 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	while (sentinel) {
-    //for(int i = 0; i < 1; ++i){
+	//while (sentinel) {
+    for(int i = 0; i < 1; ++i){
 		//randomly shuffle the populations to a new tour
 		shuffle();
 		//compute fitness of each tours
@@ -383,11 +381,11 @@ int main(int argc, char **argv)
 {
 
 
-    popSize = read_int(argc, argv, "-n", 10000);
+    popSize = read_int(argc, argv, "-n", 100);
     CITI = read_int(argc, argv,"-c",12);
     goal = read_int(argc, argv,"-g",821);
-    fitness.reserve(popSize);
-    children.reserve(popSize);
+    fitness = vector<double>(popSize);
+    children = vector<long>(popSize);
     bestCost = INT_MAX; //set best cost very high so we can go under it
     readDistanceMatrix(); //read in our distance_matrix
     double simulationTime = omp_get_wtime();
