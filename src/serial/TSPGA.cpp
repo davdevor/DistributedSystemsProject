@@ -1,5 +1,4 @@
-
-
+#include <string.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -8,23 +7,24 @@
 #include <algorithm>
 #include <limits.h>
 #define MAX 100 //the max array value for distance_mat
-#define CITI 12 //The number of cities
-#define popSize 200
-#define goal 821
 using namespace std;
 using std::cout;
 using std::endl;
 using std::ifstream;
 using std::vector;
 using std::iterator;
+int popSize;
+int CITI;
+int goal;
 bool sentinel = true;
 long distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
 vector<long> Remainder; //Global Remainder vector
 vector<long> tour; //Global tour Vector
 long bestCost; //Global bestCost variable
 vector<vector<long> > population;
-vector<double> fitness(popSize);
-vector<long> children(popSize);
+vector<double> fitness;
+vector<long> children;
+
 
 void readDistanceMatrix()
 {
@@ -357,7 +357,7 @@ int read_int( int argc, char **argv, const char *option, int default_value )
     return default_value;
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	popSize = read_int(argc, argv, "-n", 100);
     	CITI = read_int(argc, argv,"-c",12);
