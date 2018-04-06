@@ -1,0 +1,7 @@
+time 66.1972 popsize 20000 citi 12 num threads 4
+time 33.4277 popsize 10000 citi 12 num threads 2
+time 35.6515 popsize 10000 citi 12 num threads 3
+time 34.2734 popsize 10000 citi 12 num threads 4
+time 36.548 popsize 10000 citi 12 num threads 2
+time 53.5525 popsize 15000 citi 12 num threads 3
+time 66.177 popsize 20000 citi 12 num threads 4
