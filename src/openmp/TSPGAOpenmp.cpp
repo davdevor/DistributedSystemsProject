@@ -29,7 +29,7 @@ double avgFitness;
 void readDistanceMatrix()
 {
 	ifstream inf;
-    string file = "../tsp";
+    string file = "tsp";
     file += std::to_string(CITI);
     file+=".txt";
 	inf.open(file);
@@ -342,8 +342,8 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	//while (sentinel) {
-    for(int i = 0; i < 1; ++i){
+	while (sentinel) {
+    //for(int i = 0; i < 1000; ++i){
 		//randomly shuffle the populations to a new tour
 		shuffle();
 		//compute fitness of each tours
@@ -379,9 +379,12 @@ int read_int( int argc, char **argv, const char *option, int default_value )
 
 int main(int argc, char **argv)
 {
-
-
-    popSize = read_int(argc, argv, "-n", 10000);
+    int numthreads;
+    #pragma omp parallel
+    {
+        numthreads = omp_get_num_threads();
+    }
+    popSize = read_int(argc, argv, "-n", 1000);
     CITI = read_int(argc, argv,"-c",12);
     goal = read_int(argc, argv,"-g",821);
     fitness = vector<double>(popSize);
@@ -391,7 +394,9 @@ int main(int argc, char **argv)
     double simulationTime = omp_get_wtime();
 	gaTSP();
     double endTime =  omp_get_wtime();
-
-    cout << "time " << endTime - simulationTime << endl;
+    ofstream myfile;
+    myfile.open ("openmp.txt",std::ios::app);
+    myfile << "time " << endTime - simulationTime << " popsize " << popSize<< " citi " << CITI << " num threads " << numthreads << endl;
+    myfile.close();
 	return 0;
 }
