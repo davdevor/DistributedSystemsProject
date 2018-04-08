@@ -1,2 +1,2 @@
- TSPGA: TSPGA.cpp
-	g++ -std=c++11 -o $@ TSPGA.cpp
+ TSPGA: TSPGASerial.cpp
+	g++ -std=c++11 -o $@ TSPGASerial.cpp
