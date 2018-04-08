@@ -375,7 +375,7 @@ int main(int argc, char **argv)
 	gaTSP();
 	auto end = chrono::steady_clock::now();
 	ofstream myfile;
-        myfile.open ("openmp.txt",std::ios::app);
+        myfile.open ("serial.txt",std::ios::app);
 	myfile << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(end - start).count()<< " popsize " << popSize<< " citi " << CITI << endl;
         myfile.close();
 	return 0;
