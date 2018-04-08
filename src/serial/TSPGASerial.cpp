@@ -28,8 +28,11 @@ vector<long> children;
 
 void readDistanceMatrix()
 {
+	 string file = "../data/tsp";
+    	file += std::to_string(CITI);
+    	file+=".txt";
 	ifstream inf;
-	inf.open("tsp12.txt");
+	inf.open(file);
 	int value, i, j;
 	for (i = 0; i < CITI && !inf.fail(); i++) {
 		for (j = i; j < CITI && !inf.fail(); j++) {
@@ -359,7 +362,7 @@ int read_int( int argc, char **argv, const char *option, int default_value )
 
 int main(int argc, char **argv)
 {
-	popSize = read_int(argc, argv, "-n", 100);
+	popSize = read_int(argc, argv, "-n", 1000);
     	CITI = read_int(argc, argv,"-c",12);
     	goal = read_int(argc, argv,"-g",821);
     	fitness = vector<double>(popSize);
@@ -371,7 +374,9 @@ int main(int argc, char **argv)
 	auto start = chrono::steady_clock::now();
 	gaTSP();
 	auto end = chrono::steady_clock::now();
-	cout << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(end - start).count() << endl;
-	system("pause"); //allows a pause before shutting down for use outside the compiler
+	ofstream myfile;
+        myfile.open ("serial.txt",std::ios::app);
+	myfile << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(end - start).count()<< " popsize " << popSize<< " citi " << CITI << endl;
+        myfile.close();
 	return 0;
 }
