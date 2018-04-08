@@ -29,7 +29,7 @@ double avgFitness;
 void readDistanceMatrix()
 {
 	ifstream inf;
-    string file = "tsp";
+    string file = "../data/tsp";
     file += std::to_string(CITI);
     file+=".txt";
 	inf.open(file);
