@@ -28,7 +28,7 @@ vector<long> children;
 
 void readDistanceMatrix()
 {
-	 string file = "tsp";
+	 string file = "../data/tsp";
     	file += std::to_string(CITI);
     	file+=".txt";
 	ifstream inf;
