@@ -381,8 +381,8 @@ int main(int argc, char **argv)
 {
 
 
-    popSize = read_int(argc, argv, "-n", 10000);
-    CITI = read_int(argc, argv,"-c",12);
+    popSize = read_int(argc, argv, "-n", 175000);
+    CITI = read_int(argc, argv,"-c",13);
     goal = read_int(argc, argv,"-g",821);
     fitness = vector<double>(popSize);
     children = vector<long>(popSize);
