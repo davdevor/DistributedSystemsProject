@@ -326,7 +326,7 @@ void gaTSP() {
 		}
 	}
 	//while (sentinel) {
-	for(int i = 0; i < 10000; ++i){
+	for(int i = 0; i < 100000; ++i){
 		//randomly shuffle the populations to a new tour
 		shuffle();
 		//compute fitness of each tours
