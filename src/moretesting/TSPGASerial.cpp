@@ -133,11 +133,11 @@ void computeFitness() {
 			if (tourCost == goal) {
 				sentinel = false;
 			}
-			/*cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
+			cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
 			for (int k = 0; k < CITI; ++k) {
 				cout << population.at(i).at(k) << " "; //now print the path taken (for verification if needed
 			}
-			cout << endl;*/
+			cout << endl;
 		}
 		fitness[i] = (double)tourCost;
 	}
@@ -325,8 +325,10 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	//while (sentinel) {
-	for(int i = 0; i < 100000; ++i){
+auto start = chrono::steady_clock::now();
+	while (chrono::duration_cast <chrono::seconds>(chrono::steady_clock::now() - start).count()<7200) {
+	
+	//for(int i = 0; i < 100000; ++i){
 		//randomly shuffle the populations to a new tour
 		shuffle();
 		//compute fitness of each tours
@@ -340,6 +342,7 @@ void gaTSP() {
 		//reset fitness and children values
 		fitness = vector<double>(popSize, 0.0);
 		children = vector<long>(popSize, 0);
+		
 	}
 
 }
@@ -372,9 +375,9 @@ int main(int argc, char **argv)
 
 	readDistanceMatrix(); //read in our distance_matrix
 	myfile.open ("serial.txt",std::ios::app);
-	auto start = chrono::steady_clock::now();
+	
 	gaTSP();
-	auto end = chrono::steady_clock::now();
+
 	
 
         myfile.close();

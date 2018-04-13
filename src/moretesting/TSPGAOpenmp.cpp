@@ -343,8 +343,9 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	//while (sentinel) {
-      for(int i = 0; i < 100000; ++i){
+	 double simulationTime = omp_get_wtime();
+      while (omp_get_wtime() - simulationTime < 7200) {
+      //for(int i = 0; i < 100000; ++i){
 		//randomly shuffle the populations to a new tour
 		shuffle();
 		//compute fitness of each tours
@@ -393,9 +394,8 @@ int main(int argc, char **argv)
     children = vector<long>(popSize);
     bestCost = INT_MAX; //set best cost very high so we can go under it
     readDistanceMatrix(); //read in our distance_matrix
-    double simulationTime = omp_get_wtime();
+   
 	gaTSP();
-    double endTime =  omp_get_wtime();
     myfile.close();
 	return 0;
 }
