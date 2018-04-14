@@ -120,11 +120,11 @@ void computeFitness() {
                 if (tourCost == goal) {
                     sentinel = false;
                 }
-                /*cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
+                cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
                 for (int k = 0; k < CITI; ++k) {
                     cout << population.at(i).at(k) << " "; //now print the path taken (for verification if needed
                 }
-                cout << endl;*/
+                cout << endl;
             }
         }
 
