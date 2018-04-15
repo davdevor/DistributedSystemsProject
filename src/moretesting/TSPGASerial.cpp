@@ -330,7 +330,7 @@ auto start = chrono::steady_clock::now();
 	
 	//for(int i = 0; i < 100000; ++i){
 		//randomly shuffle the populations to a new tour
-		shuffle();
+		//shuffle();
 		//compute fitness of each tours
 		computeFitness();
 		//decide the children from the population
