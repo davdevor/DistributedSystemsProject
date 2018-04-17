@@ -327,10 +327,10 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-
+auto start = chrono::steady_clock::now();
+	while (chrono::duration_cast <chrono::seconds>(chrono::steady_clock::now() - start).count()<30) {
 	
-	shuffle();
-	while(sentinel){
+	//for(int i = 0; i < 100000; ++i){
 		//randomly shuffle the populations to a new tour
 		//shuffle();
 		//compute fitness of each tours
@@ -376,10 +376,11 @@ int main(int argc, char **argv)
 	bestCost = INT_MAX; //set best cost very high so we can go under it
 
 	readDistanceMatrix(); //read in our distance_matrix
-
-	auto start = chrono::steady_clock::now();
+	myfile.open ("serial.txt",std::ios::app);
+	
 	gaTSP();
-	cout << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(chrono::steady_clock::now() - start).count() << " popsize " << popSize << " citi " << CITI << endl;
+
+	
 
         myfile.close();
 	return 0;

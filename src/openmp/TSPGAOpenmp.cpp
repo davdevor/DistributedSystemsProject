@@ -25,7 +25,6 @@ vector<double> fitness;
 vector<long> children;
 double avgFitness;
 
-
 void readDistanceMatrix()
 {
 	ifstream inf;
@@ -104,15 +103,15 @@ void offspring() {
 void computeFitness() {
 	long tourCost;
     avgFitness = 0.0;
-
+       double tempAvg = 0.0;
 	//run loop in parallel
-    #pragma omp parallel for reduction(+:avgFitness) private(tourCost)
+    #pragma omp parallel for reduction(+:avgFitness,tempAvg) private(tourCost)
     for (int i = 0; i < popSize; ++i) {
         //compute tour cost for each member of population
         tourCost = computeTourCost(population[i]);
 
-        fitness[i] = (double)tourCost;
-        avgFitness += (double)tourCost;
+        fitness[i] = 10000.0 - (double)tourCost;
+        avgFitness += 10000.0 -(double)tourCost;
         #pragma omp critical
         {
             if (tourCost < bestCost) { //see if this full tour is better than the best known tour
@@ -342,10 +341,8 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	while (sentinel) {
-    //for(int i = 0; i < 1000; ++i){
-		//randomly shuffle the populations to a new tour
-		shuffle();
+        shuffle();
+        while(sentinel){
 		//compute fitness of each tours
 		computeFitness();
 		//decide the children from the population
@@ -392,11 +389,7 @@ int main(int argc, char **argv)
     bestCost = INT_MAX; //set best cost very high so we can go under it
     readDistanceMatrix(); //read in our distance_matrix
     double simulationTime = omp_get_wtime();
-	gaTSP();
-    double endTime =  omp_get_wtime();
-    ofstream myfile;
-    myfile.open ("openmp.txt",std::ios::app);
-    myfile << "time " << endTime - simulationTime << " popsize " << popSize<< " citi " << CITI << " num threads " << numthreads << endl;
-    myfile.close();
-	return 0;
+    gaTSP();
+    cout << "time " << omp_get_wtime() - simulationTime << "popsize " << popSize << " citi " << CITI << " num threads" << numthreads<< endl;
+    return 0;
 }
