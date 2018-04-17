@@ -330,7 +330,7 @@ void gaTSP() {
 
 	
 	shuffle();
-	for(int i = 0; i < 100; ++i){
+	for(int i = 0; i < 1000; ++i){
 		//randomly shuffle the populations to a new tour
 		//shuffle();
 		//compute fitness of each tours

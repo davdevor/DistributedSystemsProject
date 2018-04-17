@@ -342,7 +342,7 @@ void gaTSP() {
 		}
 	}
         shuffle();
-        for(int i = 0; i < 100; ++i){
+        for(int i = 0; i < 1000; ++i){
 		//compute fitness of each tours
 		computeFitness();
 		//decide the children from the population
