@@ -345,7 +345,7 @@ void gaTSP() {
 		}
 	}
 	 double simulationTime = omp_get_wtime();
-      while (omp_get_wtime() - simulationTime < 7200) {
+      while (omp_get_wtime() - simulationTime < 30) {
       //for(int i = 0; i < 100000; ++i){
 		//randomly shuffle the populations to a new tour
 		//shuffle();

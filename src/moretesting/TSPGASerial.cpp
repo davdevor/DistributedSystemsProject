@@ -328,7 +328,7 @@ void gaTSP() {
 		}
 	}
 auto start = chrono::steady_clock::now();
-	while (chrono::duration_cast <chrono::seconds>(chrono::steady_clock::now() - start).count()<7200) {
+	while (chrono::duration_cast <chrono::seconds>(chrono::steady_clock::now() - start).count()<30) {
 	
 	//for(int i = 0; i < 100000; ++i){
 		//randomly shuffle the populations to a new tour
