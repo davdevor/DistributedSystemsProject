@@ -17,15 +17,9 @@ def serial():
     y =[]
     #for x in range(10):
     for x in data:
-        if(count < 10):
             y.append(float(x.strip()))
             X.append(count)
-        if(count % 1000 == 0):
-            y.append(float(x.strip()))
-            X.append(count)
-        count += 1.0
-    v = [0,300000,3250,4400]
-    plt.axis(v)
+            count += 1.0
     plt.plot(X,y)
     minP = min(y)
     file = open('serial.txt','r')
@@ -35,13 +29,9 @@ def serial():
     X = []
     y =[]
     for x in data:
-        if(count < 10):
             y.append(float(x.strip()))
             X.append(count)
-        elif(count % 1000 == 0):
-            y.append(float(x.strip()))
-            X.append(count)
-        count += 1.0
+            count += 1.0
     minS = min(y)
     plt.plot(X,y, label ='serial')
     orange_patch = mpatches.Patch(color='orange', label='Serial min ' + str(minS))

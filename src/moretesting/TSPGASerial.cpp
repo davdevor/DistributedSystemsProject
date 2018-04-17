@@ -76,11 +76,13 @@ void twoswap(int i, int p, int q) {
 //computes average fitness
 double avgFitness() {
 	double sum = 0;
+	double newSum = 0.0;
 	for (int i = 0; i < popSize; i++) {
 		sum += fitness[i];
+		newSum += 10000 - fitness[i];
 	}
 	sum /= popSize;
-	myfile << sum << endl;
+	myfile << newSum/popSize << endl;
 	return sum;
 }
 void offspring() {
@@ -139,7 +141,7 @@ void computeFitness() {
 			}
 			cout << endl;
 		}
-		fitness[i] = (double)tourCost;
+		fitness[i] = 10000 - (double)tourCost;
 	}
 }
 

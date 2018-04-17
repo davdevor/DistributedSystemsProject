@@ -104,15 +104,16 @@ void offspring() {
 void computeFitness() {
 	long tourCost;
     avgFitness = 0.0;
-
+       double tempAvg = 0.0;
 	//run loop in parallel
-    #pragma omp parallel for reduction(+:avgFitness) private(tourCost)
+    #pragma omp parallel for reduction(+:avgFitness,tempAvg) private(tourCost)
     for (int i = 0; i < popSize; ++i) {
         //compute tour cost for each member of population
         tourCost = computeTourCost(population[i]);
 
-        fitness[i] = (double)tourCost;
-        avgFitness += (double)tourCost;
+        fitness[i] = 10000.0 - (double)tourCost;
+        avgFitness += 10000.0 -(double)tourCost;
+        tempAvg += (double)tourCost;
         #pragma omp critical
         {
             if (tourCost < bestCost) { //see if this full tour is better than the best known tour
@@ -132,7 +133,7 @@ void computeFitness() {
 
 
     avgFitness/=popSize;
-    myfile << avgFitness << endl;
+    myfile << tempAvg/popSize << endl;
 }
 
 
