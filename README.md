@@ -17,6 +17,6 @@ Once a full child is created it replaces the worse of the two parents. After heu
 
 ## How to run the project
 I have this project setup to build on Linux platforms. To run the project, you can go into the serial or the openmp folder and run make in the terminal to build the executables. When you run the program can use -c to specify the city number, -g to specify the lowest cost path, -n to specify the population size.
-If you leave those out it defaults to city size of 12, goal of 821, population size of 1000. For example you could run it as ./serial -c 14 -g 958 -n 10000 .
+If you leave those out it defaults to city size of 12, goal of 821, population size of 1000. For example you could run it as ./serial -c 14 -g 958 -n 10000 . The programs are sset to look for the data files using relative paths so it looks in '../Data/'. So the execuatable needs to be in a directory below the data folder.
 
 
