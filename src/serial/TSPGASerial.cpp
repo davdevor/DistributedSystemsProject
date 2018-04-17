@@ -24,7 +24,6 @@ long bestCost; //Global bestCost variable
 vector<vector<long> > population;
 vector<double> fitness;
 vector<long> children;
-ofstream myfile;
 
 void readDistanceMatrix()
 {
@@ -79,10 +78,11 @@ double avgFitness() {
 	double newSum = 0.0;
 	for (int i = 0; i < popSize; i++) {
 		sum += fitness[i];
+		// do 10000 - tourcost because offspring tries to pick the highest fitness numbers
+	        // so if you use a file with a path cost greater than 10000 you need to change this number
 		newSum += 10000 - fitness[i];
 	}
 	sum /= popSize;
-	myfile << newSum/popSize << endl;
 	return sum;
 }
 void offspring() {
@@ -141,6 +141,8 @@ void computeFitness() {
 			}
 			cout << endl;
 		}
+		// do 10000 - tourcost because offspring tries to pick the highest fitness numbers
+		// so if you use a file with a path cost greater than 10000 you need to change this number
 		fitness[i] = 10000 - (double)tourCost;
 	}
 }
@@ -380,7 +382,5 @@ int main(int argc, char **argv)
 	auto start = chrono::steady_clock::now();
 	gaTSP();
 	cout << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(chrono::steady_clock::now() - start).count() << " popsize " << popSize << " citi " << CITI << endl;
-
-        myfile.close();
 	return 0;
 }

@@ -109,7 +109,8 @@ void computeFitness() {
     for (int i = 0; i < popSize; ++i) {
         //compute tour cost for each member of population
         tourCost = computeTourCost(population[i]);
-
+	// do 10000 - tourcost because offspring tries to pick the highest fitness numbers
+	// so if you use a file with a path cost greater than 10000 you need to change this number
         fitness[i] = 10000.0 - (double)tourCost;
         avgFitness += 10000.0 -(double)tourCost;
         #pragma omp critical
