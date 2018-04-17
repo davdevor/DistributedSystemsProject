@@ -24,7 +24,7 @@ long bestCost; //Global bestCost variable
 vector<vector<long> > population;
 vector<double> fitness;
 vector<long> children;
-
+ofstream myfile;
 
 void readDistanceMatrix()
 {
@@ -76,10 +76,13 @@ void twoswap(int i, int p, int q) {
 //computes average fitness
 double avgFitness() {
 	double sum = 0;
+	double newSum = 0.0;
 	for (int i = 0; i < popSize; i++) {
 		sum += fitness[i];
+		newSum += 10000 - fitness[i];
 	}
 	sum /= popSize;
+	myfile << newSum/popSize << endl;
 	return sum;
 }
 void offspring() {
@@ -127,18 +130,18 @@ void computeFitness() {
 	}
 	for (int i = 0; i < popSize; ++i) {
 		tourCost = costs[i];
-		if (tourCost < bestCost) { //see if this full tour is better than the best known tour
+		/*if (tourCost < bestCost) { //see if this full tour is better than the best known tour
 			bestCost = tourCost;
 			if (tourCost == goal) {
 				sentinel = false;
 			}
-			/*cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
+			cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
 			for (int k = 0; k < CITI; ++k) {
 				cout << population.at(i).at(k) << " "; //now print the path taken (for verification if needed
 			}
-			cout << endl;*/
-		}
-		fitness[i] = (double)tourCost;
+			cout << endl;
+		}*/
+		fitness[i] = 10000 - (double)tourCost;
 	}
 }
 
@@ -324,10 +327,12 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	//while (sentinel) {
-	for(int i = 0; i < 1000; ++i){
+
+	
+	shuffle();
+	for(int i = 0; i < 100; ++i){
 		//randomly shuffle the populations to a new tour
-		shuffle();
+		//shuffle();
 		//compute fitness of each tours
 		computeFitness();
 		//decide the children from the population
@@ -339,6 +344,7 @@ void gaTSP() {
 		//reset fitness and children values
 		fitness = vector<double>(popSize, 0.0);
 		children = vector<long>(popSize, 0);
+		
 	}
 
 }
@@ -373,10 +379,8 @@ int main(int argc, char **argv)
 
 	auto start = chrono::steady_clock::now();
 	gaTSP();
-	auto end = chrono::steady_clock::now();
-	ofstream myfile;
-        myfile.open ("serial.txt",std::ios::app);
-	myfile << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(end - start).count()<< " popsize " << popSize<< " citi " << CITI << endl;
+	cout << "elapsed time in seconds: " << chrono::duration_cast <chrono::seconds>(chrono::steady_clock::now() - start).count() << " popsize " << popSize << " citi " << CITI << endl;
+
         myfile.close();
 	return 0;
 }
