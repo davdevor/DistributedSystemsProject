@@ -390,6 +390,6 @@ int main(int argc, char **argv)
     readDistanceMatrix(); //read in our distance_matrix
     double simulationTime = omp_get_wtime();
     gaTSP();
-    cout << "time " << omp_get_wtime() - simulationTime << "popsize " << popSize << " citi " << CITI << " num threads" << numthreads<< endl;
+    cout << "time " << omp_get_wtime() - simulationTime << " popsize " << popSize << " citi " << CITI << " num threads " << numthreads<< endl;
     return 0;
 }
