@@ -16,7 +16,7 @@ Once a full child is created it replaces the worse of the two parents. After heu
 * moretesting folder contains different tests that test the average fitness. It also has a graph.py file to graph the data use python3 to run.
 
 ## How to run the project
-I have this project setup to build on Linux platforms. To run the project, you can go into the serial or the openmp folder and run make in the terminal to build the executables. When you run the program can use -c to specify the city number, -g to specify the lowest cost path, -n to specify the population size.
-If you leave those out it defaults to city size of 12, goal of 821, population size of 1000. For example you could run it as ./serial -c 14 -g 958 -n 10000 . The programs are sset to look for the data files using relative paths so it looks in '../Data/'. So the execuatable needs to be in a directory below the data folder.
+I have this project setup to build on Linux platforms. To run the project, you can go into the serial or the openmp folder and run make in the terminal to build the executables. When you run the program can use -c to specify the city number, -g to specify the lowest cost path, -n to specify the population size. If you set the population size it needs to be an even number. The heuristic crossover method is setup to use an even population size.
+If you leave those out it defaults to city size of 12, goal of 821, population size of 1000. For example you could run it as ./serial -c 14 -g 958 -n 10000 . The programs are set to look for the data files using relative paths so it looks in '../Data/'. So the execuatable needs to be in a directory below the data folder.
 
 
