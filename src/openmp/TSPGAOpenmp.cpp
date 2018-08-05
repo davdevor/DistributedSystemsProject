@@ -16,10 +16,10 @@ int popSize;
 int CITI;
 int goal;
 bool sentinel = true;
-long distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
+double distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
 vector<long> Remainder; //Global Remainder vector
 vector<long> tour; //Global tour Vector
-long bestCost; //Global bestCost variable
+double bestCost; //Global bestCost variable
 vector<vector<long> > population;
 vector<double> fitness;
 vector<long> children;
@@ -50,7 +50,7 @@ void readDistanceMatrix()
 //function for computing the cost of a tour
 long computeTourCost(vector<long> tour)
 {
-	long sum = 0; //progressive total
+	double sum = 0; //progressive total
 	for (int i = 0; i < tour.size() - 1; i++) { //Go through the entire tour except for the last spot and add each pair of values
 		long temp1 = tour.at(i);
 		long temp2 = tour.at(i + 1);
@@ -101,7 +101,7 @@ void offspring() {
 }
 
 void computeFitness() {
-	long tourCost;
+	double tourCost;
     avgFitness = 0.0;
        double tempAvg = 0.0;
 	//run loop in parallel
@@ -221,7 +221,7 @@ void heuristicCrossover() {
 				++pos1;
 			}
 
-			int pos2 = 0;
+			double pos2 = 0;
 			//find start city in parent 2
 			while (population[i + 1][pos2] != city)
 			{
@@ -240,7 +240,7 @@ void heuristicCrossover() {
 				cost1 = distance_mat[city][conn1];
 			}
 
-			int cost2;
+			double cost2;
 			//if city is at end of parent tour there is no connecting edge max cost max int
 			if (pos2 == (CITI - 1)) {
 				cost2 = INT_MAX;
