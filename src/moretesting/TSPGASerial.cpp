@@ -6,7 +6,8 @@
 #include <chrono>
 #include <algorithm>
 #include <limits.h>
-#define MAX 100 //the max array value for distance_mat
+#define MAX 300 //the max array value for distance_mat
+#define FITNESSNUMBER 50000
 using namespace std;
 using std::cout;
 using std::endl;
@@ -16,16 +17,16 @@ using std::iterator;
 int popSize;
 int CITI;
 int goal;
+int seconds;
 bool sentinel = true;
-long distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
+double distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
 vector<long> Remainder; //Global Remainder vector
 vector<long> tour; //Global tour Vector
-long bestCost; //Global bestCost variable
+double bestCost; //Global bestCost variable
 vector<vector<long> > population;
 vector<double> fitness;
 vector<long> children;
 ofstream myfile;
-
 void readDistanceMatrix()
 {
 	 string file = "../data/tsp";
@@ -33,14 +34,15 @@ void readDistanceMatrix()
     	file+=".txt";
 	ifstream inf;
 	inf.open(file);
-	int value, i, j;
+	int i, j;
+	double value;
 	for (i = 0; i < CITI && !inf.fail(); i++) {
 		for (j = i; j < CITI && !inf.fail(); j++) {
 			if (i == j) {
 				distance_mat[i][j] = 0;
 			}
 			else {
-				inf >> value;
+                inf >> value;
 				distance_mat[i][j] = value;
 				distance_mat[j][i] = value;
 			}
@@ -49,9 +51,9 @@ void readDistanceMatrix()
 }
 
 //function for computing the cost of a tour
-long computeTourCost(vector<long> tour)
+double computeTourCost(vector<long> tour)
 {
-	long sum = 0; //progressive total
+	double sum = 0.0; //progressive total
 	for (int i = 0; i < tour.size() - 1; i++) { //Go through the entire tour except for the last spot and add each pair of values
 		long temp1 = tour.at(i);
 		long temp2 = tour.at(i + 1);
@@ -79,10 +81,13 @@ double avgFitness() {
 	double newSum = 0.0;
 	for (int i = 0; i < popSize; i++) {
 		sum += fitness[i];
-		newSum += 10000 - fitness[i];
+		// do 10000 - tourcost because offspring tries to pick the highest fitness numbers
+	        // so if you use a file with a path cost greater than 10000 you need to change this number
+		newSum += FITNESSNUMBER - fitness[i];
 	}
 	sum /= popSize;
-	myfile << newSum/popSize << endl;
+    myfile << newSum/popSize << endl;
+    myfile.flush();
 	return sum;
 }
 void offspring() {
@@ -118,21 +123,18 @@ void offspring() {
 }
 
 void computeFitness() {
-	long tourCost;
+	double tourCost;
 
-	long costs[popSize];
-	//run loop in paralell
-	{
-		for (int i = 0; i < popSize; ++i) {
-			//compute tour cost for each member of population
-			costs[i] = computeTourCost(population[i]);
-		}
+	double costs[popSize];
+	for (int i = 0; i < popSize; ++i) {
+	    //compute tour cost for each member of population
+        costs[i] = computeTourCost(population[i]);
 	}
 	for (int i = 0; i < popSize; ++i) {
 		tourCost = costs[i];
 		if (tourCost < bestCost) { //see if this full tour is better than the best known tour
 			bestCost = tourCost;
-			if (tourCost == goal) {
+			if (tourCost <= goal) {
 				sentinel = false;
 			}
 			cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
@@ -141,7 +143,9 @@ void computeFitness() {
 			}
 			cout << endl;
 		}
-		fitness[i] = 10000 - (double)tourCost;
+		// do 10000 - tourcost because offspring tries to pick the highest fitness numbers
+		// so if you use a file with a path cost greater than 10000 you need to change this number
+		fitness[i] = FITNESSNUMBER - (double)tourCost;
 	}
 }
 
@@ -222,7 +226,7 @@ void heuristicCrossover() {
 				++pos2;
 			}
 
-			int cost1;
+			double cost1;
 			//if city is at end of parent no connecting edge max cost max int
 			if (pos1 == (CITI - 1)) {
 				cost1 = INT_MAX;
@@ -234,7 +238,7 @@ void heuristicCrossover() {
 				cost1 = distance_mat[city][conn1];
 			}
 
-			int cost2;
+			double cost2;
 			//if city is at end of parent no connecting edge max cost max int
 			if (pos2 == (CITI - 1)) {
 				cost2 = INT_MAX;
@@ -306,8 +310,8 @@ void heuristicCrossover() {
 			
 		}
 		//get cost of parents and replace the worse one with child
-		int parentCost1 = computeTourCost(population[i]);
-		int parentCost2 = computeTourCost(population[i + 1]);
+		double parentCost1 = computeTourCost(population[i]);
+		double parentCost2 = computeTourCost(population[i + 1]);
 		if (parentCost1 > parentCost2) {
 			population[i] = newTour;
 		}
@@ -327,10 +331,11 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-auto start = chrono::steady_clock::now();
-	while (chrono::duration_cast <chrono::seconds>(chrono::steady_clock::now() - start).count()<30) {
+
 	
-	//for(int i = 0; i < 100000; ++i){
+	shuffle();
+    auto start = chrono::steady_clock::now();
+    while(chrono::duration_cast <chrono::seconds>(chrono::steady_clock::now() - start).count()  < seconds){
 		//randomly shuffle the populations to a new tour
 		//shuffle();
 		//compute fitness of each tours
@@ -369,19 +374,23 @@ int read_int( int argc, char **argv, const char *option, int default_value )
 int main(int argc, char **argv)
 {
 	popSize = read_int(argc, argv, "-n", 1000);
-    	CITI = read_int(argc, argv,"-c",12);
-    	goal = read_int(argc, argv,"-g",821);
-    	fitness = vector<double>(popSize);
-    	children = vector<long>(popSize);
+	CITI = read_int(argc, argv,"-c",12);
+	goal = read_int(argc, argv,"-g",821);
+	seconds = read_int(argc, argv, "-t", 30);
+	fitness = vector<double>(popSize);
+	children = vector<long>(popSize);
 	bestCost = INT_MAX; //set best cost very high so we can go under it
-
+    string fileName = "serial-";
+    fileName += to_string(CITI);
+    fileName += "-"+to_string(popSize);
+    fileName +="-"+to_string(seconds);
+    fileName += ".txt";
+    myfile.open(fileName.data(),std::ios::app);
 	readDistanceMatrix(); //read in our distance_matrix
-	myfile.open ("serial.txt",std::ios::app);
-	
+   // vector<long> best  = {0 ,48,31,44,18,40,7,8,9,42,32,50,10,51,13,12,46,25,26,27,11,24,3,5,14,4,23,47,37,36,39,38,35,34,33,43,45,15,28,49,19,22,29,1,6,41,20,16,2,17,30,21};
+    //double x = computeTourCost(best);
 	gaTSP();
+    myfile.close();
 
-	
-
-        myfile.close();
-	return 0;
+    return 0;
 }
