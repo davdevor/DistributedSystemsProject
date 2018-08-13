@@ -5,7 +5,8 @@
 #include <limits.h>
 #include <string.h>
 #include<omp.h>
-#define MAX 100 //the max array value for distance_mat
+#define MAX 300 //the max array value for distance_mat
+#define FITNESSNUMBER 5000000
 using namespace std;
 using std::cout;
 using std::endl;
@@ -14,18 +15,17 @@ using std::vector;
 using std::iterator;
 int popSize;
 int CITI;
-int goal;
+int seconds;
 bool sentinel = true;
-long distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
+double distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
 vector<long> Remainder; //Global Remainder vector
 vector<long> tour; //Global tour Vector
-long bestCost; //Global bestCost variable
+double bestCost; //Global bestCost variable
 vector<vector<long> > population;
 vector<double> fitness;
 vector<long> children;
 double avgFitness;
 ofstream myfile;
-
 void readDistanceMatrix()
 {
 	ifstream inf;
@@ -33,7 +33,8 @@ void readDistanceMatrix()
     file += std::to_string(CITI);
     file+=".txt";
 	inf.open(file);
-	int value, i, j;
+	int i, j;
+	double value;
 	for (i = 0; i < CITI && !inf.fail(); i++) {
 		for (j = i; j < CITI && !inf.fail(); j++) {
 			if (i == j) {
@@ -51,7 +52,7 @@ void readDistanceMatrix()
 //function for computing the cost of a tour
 long computeTourCost(vector<long> tour)
 {
-	long sum = 0; //progressive total
+	double sum = 0; //progressive total
 	for (int i = 0; i < tour.size() - 1; i++) { //Go through the entire tour except for the last spot and add each pair of values
 		long temp1 = tour.at(i);
 		long temp2 = tour.at(i + 1);
@@ -102,7 +103,7 @@ void offspring() {
 }
 
 void computeFitness() {
-	long tourCost;
+	double tourCost;
     avgFitness = 0.0;
        double tempAvg = 0.0;
 	//run loop in parallel
@@ -110,17 +111,15 @@ void computeFitness() {
     for (int i = 0; i < popSize; ++i) {
         //compute tour cost for each member of population
         tourCost = computeTourCost(population[i]);
-
-        fitness[i] = 10000.0 - (double)tourCost;
-        avgFitness += 10000.0 -(double)tourCost;
-        tempAvg += (double)tourCost;
+	// do 10000 - tourcost because offspring tries to pick the highest fitness numbers
+	// so if you use a file with a path cost greater than 10000 you need to change this number
+        fitness[i] = FITNESSNUMBER - tourCost;
+        avgFitness += fitness[i];
+	tempAvg += tourCost;
         #pragma omp critical
         {
             if (tourCost < bestCost) { //see if this full tour is better than the best known tour
                 bestCost = tourCost;
-                if (tourCost == goal) {
-                    sentinel = false;
-                }
                 cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
                 for (int k = 0; k < CITI; ++k) {
                     cout << population.at(i).at(k) << " "; //now print the path taken (for verification if needed
@@ -133,7 +132,8 @@ void computeFitness() {
 
 
     avgFitness/=popSize;
-    myfile << tempAvg/popSize << endl;
+    myfile << tempAvg / popSize << endl;
+    
 }
 
 
@@ -230,7 +230,7 @@ void heuristicCrossover() {
 				++pos2;
 			}
 
-			int cost1;
+			double cost1;
 			//if city is at end of parent tour there is no connecting edge max cost max int
 			if (pos1 == (CITI - 1)) {
 				cost1 = INT_MAX;
@@ -242,7 +242,7 @@ void heuristicCrossover() {
 				cost1 = distance_mat[city][conn1];
 			}
 
-			int cost2;
+			double cost2;
 			//if city is at end of parent tour there is no connecting edge max cost max int
 			if (pos2 == (CITI - 1)) {
 				cost2 = INT_MAX;
@@ -316,8 +316,8 @@ void heuristicCrossover() {
 
 		}
 		//get cost of parents and replace the worse one with child
-		int parentCost1 = computeTourCost(population[i]);
-		int parentCost2 = computeTourCost(population[i + 1]);
+		double parentCost1 = computeTourCost(population[i]);
+		double parentCost2 = computeTourCost(population[i + 1]);
 		if (parentCost1 > parentCost2) {
 			population[i] = newTour;
 		}
@@ -344,11 +344,9 @@ void gaTSP() {
 			population.at(i).at(j) = j;
 		}
 	}
-	 double simulationTime = omp_get_wtime();
-      while (omp_get_wtime() - simulationTime < 30) {
-      //for(int i = 0; i < 100000; ++i){
-		//randomly shuffle the populations to a new tour
-		//shuffle();
+        shuffle();
+	double simulationTime = omp_get_wtime();
+        while(omp_get_wtime() - simulationTime < seconds){
 		//compute fitness of each tours
 		computeFitness();
 		//decide the children from the population
@@ -387,16 +385,23 @@ int main(int argc, char **argv)
     {
         numthreads = omp_get_num_threads();
     }
-    myfile.open ("openmp.txt",std::ios::app);
     popSize = read_int(argc, argv, "-n", 1000);
     CITI = read_int(argc, argv,"-c",12);
-    goal = read_int(argc, argv,"-g",821);
+    seconds = read_int(argc, argv, "-t", 60);
     fitness = vector<double>(popSize);
     children = vector<long>(popSize);
+    string fileName = "openmp-";
+    fileName += to_string(numthreads);
+    fileName += "-"+to_string(popSize);
+    fileName += "-"+to_string(CITI);
+    fileName += "-"+to_string(seconds);
+    fileName += ".txt";
+    myfile.open(fileName.data(),std::ios::app);
+    readDistanceMatrix();
     bestCost = INT_MAX; //set best cost very high so we can go under it
     readDistanceMatrix(); //read in our distance_matrix
-   
-	gaTSP();
+    gaTSP();
+    myfile.flush();
     myfile.close();
-	return 0;
+    return 0;
 }

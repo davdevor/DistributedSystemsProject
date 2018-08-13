@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <limits.h>
 #define MAX 300 //the max array value for distance_mat
-#define FITNESSNUMBER 50000
+#define FITNESSNUMBER 5000000
 using namespace std;
 using std::cout;
 using std::endl;
@@ -16,7 +16,6 @@ using std::vector;
 using std::iterator;
 int popSize;
 int CITI;
-int goal;
 int seconds;
 bool sentinel = true;
 double distance_mat[MAX][MAX]; //Matrix storing the distances of all cities
@@ -87,7 +86,7 @@ double avgFitness() {
 	}
 	sum /= popSize;
     myfile << newSum/popSize << endl;
-    myfile.flush();
+
 	return sum;
 }
 void offspring() {
@@ -134,9 +133,6 @@ void computeFitness() {
 		tourCost = costs[i];
 		if (tourCost < bestCost) { //see if this full tour is better than the best known tour
 			bestCost = tourCost;
-			if (tourCost <= goal) {
-				sentinel = false;
-			}
 			cout << "COST: " << bestCost << endl << "PATH: "; //if so print out the distance
 			for (int k = 0; k < CITI; ++k) {
 				cout << population.at(i).at(k) << " "; //now print the path taken (for verification if needed
@@ -375,22 +371,23 @@ int main(int argc, char **argv)
 {
 	popSize = read_int(argc, argv, "-n", 1000);
 	CITI = read_int(argc, argv,"-c",12);
-	goal = read_int(argc, argv,"-g",821);
-	seconds = read_int(argc, argv, "-t", 30);
+	seconds = read_int(argc, argv, "-t", 60);
 	fitness = vector<double>(popSize);
 	children = vector<long>(popSize);
 	bestCost = INT_MAX; //set best cost very high so we can go under it
     string fileName = "serial-";
-    fileName += to_string(CITI);
-    fileName += "-"+to_string(popSize);
-    fileName +="-"+to_string(seconds);
+    fileName += to_string(popSize);
+    fileName += "-"+to_string(CITI);
+    fileName += "-"+to_string(seconds);
     fileName += ".txt";
     myfile.open(fileName.data(),std::ios::app);
 	readDistanceMatrix(); //read in our distance_matrix
    // vector<long> best  = {0 ,48,31,44,18,40,7,8,9,42,32,50,10,51,13,12,46,25,26,27,11,24,3,5,14,4,23,47,37,36,39,38,35,34,33,43,45,15,28,49,19,22,29,1,6,41,20,16,2,17,30,21};
     //double x = computeTourCost(best);
 	gaTSP();
+    myfile.flush();
     myfile.close();
 
     return 0;
 }
+

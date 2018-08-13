@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <string.h>
 #include<omp.h>
-#define MAX 100 //the max array value for distance_mat
+#define MAX 300 //the max array value for distance_mat
 using namespace std;
 using std::cout;
 using std::endl;
@@ -32,7 +32,8 @@ void readDistanceMatrix()
     file += std::to_string(CITI);
     file+=".txt";
 	inf.open(file);
-	int value, i, j;
+	int i, j;
+	double value;
 	for (i = 0; i < CITI && !inf.fail(); i++) {
 		for (j = i; j < CITI && !inf.fail(); j++) {
 			if (i == j) {
@@ -221,14 +222,14 @@ void heuristicCrossover() {
 				++pos1;
 			}
 
-			double pos2 = 0;
+			int pos2 = 0;
 			//find start city in parent 2
 			while (population[i + 1][pos2] != city)
 			{
 				++pos2;
 			}
 
-			int cost1;
+			double cost1;
 			//if city is at end of parent tour there is no connecting edge max cost max int
 			if (pos1 == (CITI - 1)) {
 				cost1 = INT_MAX;
@@ -314,8 +315,8 @@ void heuristicCrossover() {
 
 		}
 		//get cost of parents and replace the worse one with child
-		int parentCost1 = computeTourCost(population[i]);
-		int parentCost2 = computeTourCost(population[i + 1]);
+		double parentCost1 = computeTourCost(population[i]);
+		double parentCost2 = computeTourCost(population[i + 1]);
 		if (parentCost1 > parentCost2) {
 			population[i] = newTour;
 		}
